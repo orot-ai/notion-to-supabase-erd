@@ -71,7 +71,7 @@ Read `notion_raw.json` and write `schema.json` following these rules.
   "agg": [["sms","daily_synthesis"], ["daily_synthesis","weekly_synthesis"]]
 }
 ```
-See `examples/miri-life.schema.json` for a full 27-table example.
+See `examples/sample.schema.json` for a full example covering every relation type.
 
 ## 3. Render
 

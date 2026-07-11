@@ -1,0 +1,113 @@
+{
+ "title": "life-os-sample",
+ "tables": [
+  {"name": "contacts", "group": "master", "desc": "People and senders. Every message and call links back here, so the same phone/email is one person.", "columns": [
+    {"name": "id", "type": "uuid", "pk": true},
+    {"name": "name", "type": "text", "desc": "Display name."},
+    {"name": "email", "type": "text", "desc": "Primary email address."},
+    {"name": "phone", "type": "text", "desc": "Phone number."},
+    {"name": "category", "type": "select", "desc": "Relationship type (family, client, vendor, ...)."}
+  ]},
+  {"name": "messages", "group": "collect", "desc": "Incoming messages (SMS/email). Payment messages feed the ledger automatically.", "columns": [
+    {"name": "id", "type": "uuid", "pk": true},
+    {"name": "channel", "type": "select", "desc": "sms or email."},
+    {"name": "subject", "type": "text", "desc": "Subject or first line."},
+    {"name": "body", "type": "text", "desc": "Message body."},
+    {"name": "category", "type": "select", "desc": "Auto classification (billing, promo, auth, ...)."},
+    {"name": "amount", "type": "numeric", "desc": "Parsed amount, if it's a payment."},
+    {"name": "received_at", "type": "ts", "desc": "When it arrived."},
+    {"name": "contact_id", "type": "uuid", "fk": "contacts", "desc": "Who sent it."}
+  ]},
+  {"name": "calls", "group": "collect", "desc": "Call transcripts and AI summaries. Action items become tasks.", "columns": [
+    {"name": "id", "type": "uuid", "pk": true},
+    {"name": "title", "type": "text", "desc": "Call title."},
+    {"name": "summary", "type": "text", "desc": "AI-generated summary."},
+    {"name": "category", "type": "select", "desc": "Call type (work, personal, ...)."},
+    {"name": "called_at", "type": "ts", "desc": "Start time."},
+    {"name": "contact_id", "type": "uuid", "fk": "contacts", "desc": "Who you talked to."}
+  ]},
+  {"name": "notes", "group": "collect", "desc": "Freeform daily notes / journal entries.", "columns": [
+    {"name": "id", "type": "uuid", "pk": true},
+    {"name": "note_date", "type": "date", "desc": "The day."},
+    {"name": "body", "type": "text", "desc": "Note text."}
+  ]},
+  {"name": "projects", "group": "master", "desc": "Projects. Tasks and notes group under a project; sub-projects allowed.", "columns": [
+    {"name": "id", "type": "uuid", "pk": true},
+    {"name": "name", "type": "text", "desc": "Project name."},
+    {"name": "parent_id", "type": "uuid", "fk": "projects", "desc": "Parent project (sub-project hierarchy)."}
+  ]},
+  {"name": "tasks", "group": "product", "desc": "To-dos. Auto-created from messages/calls, synced to calendar.", "columns": [
+    {"name": "id", "type": "uuid", "pk": true},
+    {"name": "title", "type": "text", "desc": "What to do."},
+    {"name": "status", "type": "select", "desc": "todo / doing / done."},
+    {"name": "due_at", "type": "ts", "desc": "Due time."},
+    {"name": "parent_task_id", "type": "uuid", "fk": "tasks", "desc": "Parent task (subtasks)."}
+  ]},
+  {"name": "accounts", "group": "finance", "desc": "Bank/card accounts. Balance is computed by a view, not stored.", "columns": [
+    {"name": "id", "type": "uuid", "pk": true},
+    {"name": "name", "type": "text", "desc": "Account name."},
+    {"name": "kind", "type": "select", "desc": "checking / savings / credit."}
+  ]},
+  {"name": "categories", "group": "finance", "desc": "Expense categories with flags.", "columns": [
+    {"name": "id", "type": "uuid", "pk": true},
+    {"name": "name", "type": "text", "desc": "Category name."},
+    {"name": "is_recurring", "type": "bool", "desc": "Fixed/recurring cost."}
+  ]},
+  {"name": "expenses", "group": "finance", "desc": "The ledger. Every income/expense row (formulas live in views).", "columns": [
+    {"name": "id", "type": "uuid", "pk": true},
+    {"name": "title", "type": "text", "desc": "Description."},
+    {"name": "amount", "type": "numeric", "desc": "Amount."},
+    {"name": "spent_on", "type": "date", "desc": "Transaction date."},
+    {"name": "category_id", "type": "uuid", "fk": "categories", "desc": "Category."},
+    {"name": "account_id", "type": "uuid", "fk": "accounts", "desc": "Paid from."}
+  ]},
+  {"name": "subscriptions", "group": "finance", "desc": "Recurring subscriptions with renewal tracking.", "columns": [
+    {"name": "id", "type": "uuid", "pk": true},
+    {"name": "service", "type": "text", "desc": "Service name."},
+    {"name": "amount", "type": "numeric", "desc": "Fee."},
+    {"name": "renews_on", "type": "date", "desc": "Next renewal date."},
+    {"name": "account_id", "type": "uuid", "fk": "accounts", "desc": "Payment method."},
+    {"name": "category_id", "type": "uuid", "fk": "categories", "desc": "Category."}
+  ]},
+  {"name": "task_projects", "group": "join", "desc": "task <-> project (many-to-many).", "columns": [
+    {"name": "task_id", "type": "uuid", "fk": "tasks"},
+    {"name": "project_id", "type": "uuid", "fk": "projects"}
+  ]},
+  {"name": "task_sources", "group": "join", "desc": "task <-> source message (where the task came from).", "columns": [
+    {"name": "task_id", "type": "uuid", "fk": "tasks"},
+    {"name": "source_id", "type": "uuid", "fk": "messages"}
+  ]},
+  {"name": "expense_sources", "group": "join", "desc": "expense <-> message evidence.", "columns": [
+    {"name": "expense_id", "type": "uuid", "fk": "expenses"},
+    {"name": "message_id", "type": "uuid", "fk": "messages"}
+  ]},
+  {"name": "daily_summary", "group": "view", "desc": "[view] One day at a glance: message/call/task counts + spend. All sources roll up here.", "columns": [
+    {"name": "day", "type": "date"},
+    {"name": "message_count", "type": "numeric", "desc": "Messages that day."},
+    {"name": "call_count", "type": "numeric", "desc": "Calls that day."},
+    {"name": "task_done", "type": "numeric", "desc": "Tasks completed."},
+    {"name": "spend", "type": "numeric", "desc": "Total spent."}
+  ]},
+  {"name": "weekly_summary", "group": "view", "desc": "[view] Weekly rollup of daily.", "columns": [
+    {"name": "week", "type": "date"},
+    {"name": "message_count", "type": "numeric", "desc": "Messages that week."},
+    {"name": "task_done", "type": "numeric", "desc": "Tasks done."},
+    {"name": "spend", "type": "numeric", "desc": "Total spent."}
+  ]},
+  {"name": "monthly_summary", "group": "view", "desc": "[view] Monthly rollup.", "columns": [
+    {"name": "month", "type": "date"},
+    {"name": "message_count", "type": "numeric", "desc": "Messages that month."},
+    {"name": "task_done", "type": "numeric", "desc": "Tasks done."},
+    {"name": "spend", "type": "numeric", "desc": "Total spent."}
+  ]},
+  {"name": "yearly_summary", "group": "view", "desc": "[view] Yearly rollup. Day/week/month/year all in one place.", "columns": [
+    {"name": "year", "type": "date"},
+    {"name": "spend", "type": "numeric", "desc": "Total spent."},
+    {"name": "task_done", "type": "numeric", "desc": "Tasks done."}
+  ]}
+ ],
+ "agg": [
+   ["messages", "daily_summary"], ["calls", "daily_summary"], ["notes", "daily_summary"], ["tasks", "daily_summary"], ["expenses", "daily_summary"],
+   ["daily_summary", "weekly_summary"], ["weekly_summary", "monthly_summary"], ["monthly_summary", "yearly_summary"]
+ ]
+}

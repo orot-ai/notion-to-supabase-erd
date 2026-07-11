@@ -5,7 +5,7 @@
 
 스키마 JSON 스펙:
 {
-  "title": "miri-life",
+  "title": "life-os-sample",
   "tables": [
     {
       "name": "sms_messages",

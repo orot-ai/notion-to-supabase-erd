@@ -45,7 +45,7 @@ Database id is the 32-hex chunk in the DB URL: `notion.so/<workspace>/<DB_ID>?v=
 
 ### 3. Design `schema.json`
 Read `notion_raw.json` and write a normalized schema (this is where the model earns its keep — see
-`SKILL.md` for the rules and `examples/miri-life.schema.json` for a full example).
+`SKILL.md` for the rules and `examples/sample.schema.json` for a full example).
 
 ### 4. Render
 ```bash
@@ -86,7 +86,7 @@ SKILL.md                     Workflow + normalization rules (read by Claude Code
 scripts/dump_notion.py       Notion property dump (stdlib, NOTION_API_TOKEN)
 scripts/render_erd.py        schema.json → interactive erd.html
 templates/erd_template.html  The ERD (data injected at render time)
-examples/miri-life.schema.json   Full 27-table example
+examples/sample.schema.json      Full example (life-os): every relation type
 examples/minimal.schema.json     Tiny example
 ```
 
