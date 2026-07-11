@@ -60,7 +60,7 @@
   .col:hover{background:color-mix(in srgb,var(--hi) 10%,transparent);}
   .col.toggle{cursor:pointer;color:var(--ink-faint);font-style:italic;justify-content:center;font-size:11px;}
   .col.toggle:hover{color:var(--hi);background:color-mix(in srgb,var(--hi) 8%,transparent);}
-  .colinfo{position:fixed;right:18px;bottom:18px;width:308px;max-width:calc(100vw - 36px);background:var(--panel);border:1px solid var(--hi);border-radius:12px;box-shadow:var(--shadow);padding:14px 16px;z-index:50;}
+  .colinfo{position:fixed;width:290px;max-width:calc(100vw - 24px);background:var(--panel);border:1px solid var(--hi);border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,.22),var(--shadow);padding:13px 15px;z-index:50;}
   .colinfo[hidden]{display:none;}
   .ci-x{position:absolute;top:8px;right:10px;border:none;background:none;color:var(--ink-faint);cursor:pointer;font-size:14px;line-height:1;}
   .ci-head{font-family:var(--mono);font-size:13.5px;color:var(--ink-soft);padding-right:16px;}
@@ -236,7 +236,7 @@ stage.addEventListener('click',e=>{
   const tog=e.target.closest('[data-toggle]');
   if(tog){ e.stopPropagation(); const id=tog.dataset.toggle; expanded[id]=!expanded[id]; els[id].innerHTML=nodeHTML(id); autoLayout(); redraw(); return; }
   const col=e.target.closest('.col');
-  if(col && col.dataset.row!==undefined){ e.stopPropagation(); showColInfo(col.closest('.node').dataset.id, +col.dataset.row); return; }
+  if(col && col.dataset.row!==undefined){ e.stopPropagation(); showColInfo(col.closest('.node').dataset.id, +col.dataset.row, e.clientX, e.clientY); return; }
   if(e.target.closest('.node')||e.target.closest('.hit')||e.target.closest('.wlabel')) return;
   locked=null; clearFocus();
 });
@@ -281,7 +281,7 @@ stage.addEventListener('pointermove',e=>{
   els[drag.id].style.left=NODES[drag.id].x+'px'; els[drag.id].style.top=NODES[drag.id].y+'px';
   redraw();
 });
-stage.addEventListener('pointerup',()=>{ if(drag && !drag.moved) showTableInfo(drag.id); drag=null; });
+stage.addEventListener('pointerup',e=>{ if(drag && !drag.moved) showTableInfo(drag.id, e.clientX, e.clientY); drag=null; });
 
 // ── 테이블 역할 설명 ──
 const TABLE_DESC=__TABLE_DESC__;
@@ -295,21 +295,30 @@ function colDesc(id,c){
   if(c[2]==='fk'){ const tgt=TABLE_DESC[c[3]]||''; return '외래키 — '+c[3]+' 테이블의 한 행을 가리켜 연결한다.'+(tgt?'\n\n['+c[3]+'] '+tgt.split('.')[0]+'.':''); }
   return TYPE_DESC[c[1]]||('타입: '+c[1]);
 }
-function showColInfo(id,row){
+function placeInfo(x,y){
+  const el=document.getElementById('colinfo');
+  el.hidden=false;
+  const w=el.offsetWidth, h=el.offsetHeight, pad=10;
+  let L=x+16, T=y+16;
+  if(L+w>window.innerWidth-pad) L=Math.max(pad, x-w-16);
+  if(T+h>window.innerHeight-pad) T=Math.max(pad, window.innerHeight-h-pad);
+  el.style.left=L+'px'; el.style.top=T+'px';
+}
+function showColInfo(id,row,x,y){
   const c=NODES[id].cols[row];
   const role=c[2]==='pk'?'PK':c[2]==='fk'?'FK → '+c[3]:'';
   document.getElementById('ci-head').innerHTML=id+' . <b>'+c[0]+'</b>';
   document.getElementById('ci-type').textContent='속성 · '+(role?role+' · ':'')+c[1];
   document.getElementById('ci-desc').textContent=colDesc(id,c);
-  document.getElementById('colinfo').hidden=false;
+  placeInfo(x,y);
 }
-function showTableInfo(id){
+function showTableInfo(id,x,y){
   const n=NODES[id];
   const gname={c:'수집 계층',m:'마스터·허브',p:'생산성·파생',f:'재무',j:'조인 테이블(N:M)',v:'뷰'}[n.g];
   document.getElementById('ci-head').innerHTML='<b>'+id+'</b>';
   document.getElementById('ci-type').textContent='테이블 · '+gname+' · '+n.cols.length+' 컬럼';
   document.getElementById('ci-desc').textContent=TABLE_DESC[id]||'';
-  document.getElementById('colinfo').hidden=false;
+  placeInfo(x,y);
 }
 document.querySelector('.ci-x').addEventListener('click',()=>document.getElementById('colinfo').hidden=true);
 </script>
