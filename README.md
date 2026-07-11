@@ -24,7 +24,7 @@ views, and making relations explicit. This tool standardizes that, and gives you
 ## Install (as a Claude Code skill)
 
 ```bash
-git clone <this-repo> ~/.claude/skills/notion-to-supabase-erd
+git clone https://github.com/orot-ai/notion-to-supabase-erd ~/.claude/skills/notion-to-supabase-erd
 ```
 Then in Claude Code: "migrate my Notion workspace to Supabase" / "build an ERD from these Notion DBs".
 
