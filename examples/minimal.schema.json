@@ -1,0 +1,27 @@
+{
+ "title":"test-life",
+ "tables":[
+  {"name":"contacts","group":"master","desc":"연락처 허브. 모든 소통이 모인다.","columns":[
+    {"name":"id","type":"uuid","pk":true},
+    {"name":"name","type":"text","desc":"이름."},
+    {"name":"category","type":"select","desc":"관계 분류."}]},
+  {"name":"sms_messages","group":"collect","desc":"휴대폰 문자.","columns":[
+    {"name":"id","type":"uuid","pk":true},
+    {"name":"content","type":"text","desc":"본문."},
+    {"name":"amount","type":"numeric","desc":"금액."},
+    {"name":"contact_id","type":"uuid","fk":"contacts","desc":"보낸 사람."}]},
+  {"name":"tasks","group":"product","desc":"할 일.","columns":[
+    {"name":"id","type":"uuid","pk":true},
+    {"name":"title","type":"text","desc":"내용."},
+    {"name":"parent_task_id","type":"uuid","fk":"tasks","desc":"상위 태스크."}]},
+  {"name":"projects","group":"master","desc":"프로젝트.","columns":[
+    {"name":"id","type":"uuid","pk":true},{"name":"name","type":"text","desc":"이름."}]},
+  {"name":"task_projects","group":"join","desc":"태스크↔프로젝트 N:M.","columns":[
+    {"name":"task_id","type":"uuid","fk":"tasks"},
+    {"name":"project_id","type":"uuid","fk":"projects"}]},
+  {"name":"daily_synthesis","group":"view","desc":"[뷰] 하루 종합.","columns":[
+    {"name":"note_date","type":"date"},
+    {"name":"sms_count","type":"numeric","desc":"문자 수."}]}
+ ],
+ "agg":[["sms_messages","daily_synthesis"]]
+}

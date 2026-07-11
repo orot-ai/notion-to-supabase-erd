@@ -1,0 +1,315 @@
+<title>__TITLE__ ERD</title>
+<style>
+  :root{
+    --ground:#fbfbfa;--panel:#fff;--ink:#37352f;--ink-soft:#6b6a66;--ink-faint:#9b9a97;--hair:#e6e6e4;
+    --collect:#2d7ac4;--collect-bg:#eaf2fb;--master:#2f9e6f;--master-bg:#e7f4ee;--finance:#c07a1e;--finance-bg:#fbf0dd;--product:#6b5bd2;--product-bg:#efecfb;
+    --fk:#2f9e6f;--nm:#6b5bd2;--self:#9b9a97;--hi:#0ea5e9;
+    --mono:ui-monospace,"SF Mono",Menlo,monospace;--sans:-apple-system,BlinkMacSystemFont,"Pretendard","Apple SD Gothic Neo",Segoe UI,sans-serif;
+    --shadow:0 1px 2px rgba(15,15,15,.06),0 6px 18px rgba(15,15,15,.08);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --ground:#1a1a1a;--panel:#232323;--ink:#e6e5e2;--ink-soft:#a5a29c;--ink-faint:#77746e;--hair:#353535;
+    --collect:#5aa2e0;--collect-bg:#122a3f;--master:#4ec48d;--master-bg:#14352a;--finance:#e0b04a;--finance-bg:#2e2510;--product:#9c8ef0;--product-bg:#201b3a;
+    --fk:#4ec48d;--nm:#9c8ef0;--self:#77746e;--shadow:0 1px 2px rgba(0,0,0,.4),0 8px 22px rgba(0,0,0,.35);
+  }}
+  :root[data-theme="light"]{--ground:#fbfbfa;--panel:#fff;--ink:#37352f;--ink-soft:#6b6a66;--ink-faint:#9b9a97;--hair:#e6e6e4;--collect:#2d7ac4;--collect-bg:#eaf2fb;--master:#2f9e6f;--master-bg:#e7f4ee;--finance:#c07a1e;--finance-bg:#fbf0dd;--product:#6b5bd2;--product-bg:#efecfb;--fk:#2f9e6f;--nm:#6b5bd2;--self:#9b9a97;--shadow:0 1px 2px rgba(15,15,15,.06),0 6px 18px rgba(15,15,15,.08);}
+  :root[data-theme="dark"]{--ground:#1a1a1a;--panel:#232323;--ink:#e6e5e2;--ink-soft:#a5a29c;--ink-faint:#77746e;--hair:#353535;--collect:#5aa2e0;--collect-bg:#122a3f;--master:#4ec48d;--master-bg:#14352a;--finance:#e0b04a;--finance-bg:#2e2510;--product:#9c8ef0;--product-bg:#201b3a;--fk:#4ec48d;--nm:#9c8ef0;--self:#77746e;--shadow:0 1px 2px rgba(0,0,0,.4),0 8px 22px rgba(0,0,0,.35);}
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;}
+  .top{padding:20px 26px 12px;}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--master);font-weight:600;}
+  h1{font-size:22px;letter-spacing:-.02em;margin:5px 0 0;font-weight:750;}
+  .sub{color:var(--ink-soft);font-size:13.5px;margin-top:6px;}
+  .legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:12px;font-size:12px;color:var(--ink-soft);align-items:center;}
+  .lg{display:flex;align-items:center;gap:6px;}
+  .lg .nsw{display:inline-block;width:11px;height:11px;border-radius:3px;}
+  .lg .ln{width:26px;height:0;border-top:2.5px solid var(--fk);}
+  .lg .ln.nm{border-top:2.5px dashed var(--nm);}
+  .lg .ln.self{border-top:2.5px solid var(--self);}
+  .lg .fbadge{font-family:var(--mono);font-size:10px;background:var(--finance-bg);color:var(--finance);padding:1px 6px;border-radius:5px;}
+  .lg .jbadge{font-family:var(--mono);font-size:10px;background:var(--product-bg);color:var(--product);padding:1px 6px;border-radius:5px;font-weight:700;}
+  code{font-family:var(--mono);font-size:.92em;background:var(--panel);padding:1px 5px;border-radius:4px;border:1px solid var(--hair);}
+  .hintbar{font-size:12px;color:var(--ink-faint);margin-top:8px;font-family:var(--mono);}
+
+  .stage-wrap{overflow:auto;border-top:1px solid var(--hair);}
+  #stage{position:relative;width:1580px;height:1240px;margin:20px;}
+  svg#wires{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none;}
+  .wire{fill:none;stroke-width:2;opacity:.6;transition:opacity .12s,stroke-width .12s;}
+  .wire.fk{stroke:var(--fk);}
+  .wire.nm{stroke:var(--nm);stroke-dasharray:6 5;}
+  .wire.self{stroke:var(--self);}
+  .wire.agg{stroke:var(--ink-faint);stroke-dasharray:3 4;stroke-width:1.7;opacity:.5;}
+  .anchor{opacity:.85;}
+  g.hl .wire{stroke:var(--hi);opacity:1;stroke-width:3.4;}
+  g.hl .anchor{fill:var(--hi);opacity:1;}
+  g.dim{opacity:.09;}
+  .wlbg{opacity:.92;}
+  .wlabel{font-family:var(--mono);font-size:10px;fill:var(--ink-faint);cursor:pointer;}
+  g.hl .wlabel{fill:var(--hi);font-weight:700;}
+  .wire,.anchor,.wlabel,.wlbg{pointer-events:auto;}
+  .hit{stroke:transparent;stroke-width:20;fill:none;cursor:pointer;pointer-events:stroke;}
+  g.sel .wire{stroke:var(--hi);opacity:1;stroke-width:4.2;}
+  g.sel .anchor{fill:var(--hi);opacity:1;}
+  g.sel .wlabel{fill:var(--hi);font-weight:800;}
+  .col.rowhl{background:color-mix(in srgb,var(--hi) 22%,transparent);color:var(--ink);font-weight:700;box-shadow:inset 0 0 0 2px var(--hi);}
+  .node.sel-node{box-shadow:0 0 0 2.5px var(--hi),var(--shadow);}
+  .node.j{width:176px;}
+  .node.j .nh{background:var(--product-bg);color:var(--product);border-color:var(--product);border-left-style:dashed;font-size:12px;}
+  .node.v .nh{background:var(--panel-2);color:var(--ink-soft);border-color:var(--ink-faint);border-left-style:dotted;font-size:12px;}
+  .col{cursor:pointer;}
+  .col:hover{background:color-mix(in srgb,var(--hi) 10%,transparent);}
+  .col.toggle{cursor:pointer;color:var(--ink-faint);font-style:italic;justify-content:center;font-size:11px;}
+  .col.toggle:hover{color:var(--hi);background:color-mix(in srgb,var(--hi) 8%,transparent);}
+  .colinfo{position:fixed;right:18px;bottom:18px;width:308px;max-width:calc(100vw - 36px);background:var(--panel);border:1px solid var(--hi);border-radius:12px;box-shadow:var(--shadow);padding:14px 16px;z-index:50;}
+  .colinfo[hidden]{display:none;}
+  .ci-x{position:absolute;top:8px;right:10px;border:none;background:none;color:var(--ink-faint);cursor:pointer;font-size:14px;line-height:1;}
+  .ci-head{font-family:var(--mono);font-size:13.5px;color:var(--ink-soft);padding-right:16px;}
+  .ci-head b{color:var(--hi);}
+  .ci-type{font-family:var(--mono);font-size:11px;color:var(--ink-faint);margin:5px 0 9px;}
+  .vbadge{font-family:var(--mono);font-size:10px;background:var(--panel-2);color:var(--ink-soft);border:1px solid var(--hair);padding:1px 6px;border-radius:5px;}
+  .ci-desc{font-size:13.5px;color:var(--ink);line-height:1.55;white-space:pre-wrap;}
+
+  .node{position:absolute;width:200px;background:var(--panel);border:1px solid var(--hair);border-radius:10px;box-shadow:var(--shadow);overflow:hidden;transition:box-shadow .12s,opacity .12s;}
+  .node.dim{opacity:.32;}
+  .node .nh{padding:8px 12px;font-family:var(--mono);font-weight:700;font-size:13px;cursor:grab;display:flex;align-items:center;justify-content:space-between;gap:6px;user-select:none;border-left:4px solid;}
+  .node .nh:active{cursor:grabbing;}
+  .node.c .nh{background:var(--collect-bg);color:var(--collect);border-color:var(--collect);}
+  .node.m .nh{background:var(--master-bg);color:var(--master);border-color:var(--master);}
+  .node.f .nh{background:var(--finance-bg);color:var(--finance);border-color:var(--finance);}
+  .node.p .nh{background:var(--product-bg);color:var(--product);border-color:var(--product);}
+  .node .fb{font-size:9.5px;font-weight:600;padding:1px 6px;border-radius:5px;background:rgba(0,0,0,.06);}
+  @media (prefers-color-scheme:dark){.node .fb{background:rgba(255,255,255,.1);}}
+  .col{padding:5px 12px;font-family:var(--mono);font-size:11.5px;color:var(--ink-soft);border-top:1px solid var(--hair);display:flex;justify-content:space-between;gap:6px;white-space:nowrap;}
+  .col .ty{color:var(--ink-faint);font-size:10px;}
+  .col.pk{color:var(--ink);font-weight:600;}
+  .col.fkcol{color:var(--fk);font-weight:600;background:color-mix(in srgb,var(--fk) 8%,transparent);}
+  .col.fkcol .ty{color:var(--fk);opacity:.7;}
+</style>
+
+<div class="top">
+  <div class="eyebrow">miri-life · Entity Relationship Diagram</div>
+  <h1>__TITLE__ — 관계 다이어그램</h1>
+  <p class="sub">FK 속성 → 대상 테이블의 <code>id</code>로 선이 이어집니다. <b>선/라벨을 클릭</b>하면 하늘색으로 고정 강조되고 연결된 양쪽 칸이 표시돼요. <b>테이블은 드래그</b>로 정리.</p>
+  <div class="legend">
+    <span class="lg" style="font-weight:700;color:var(--ink-faint)">테이블 색 =</span>
+    <span class="lg"><span class="nsw" style="background:var(--collect)"></span> 수집(원천)</span>
+    <span class="lg"><span class="nsw" style="background:var(--master)"></span> 마스터·허브</span>
+    <span class="lg"><span class="nsw" style="background:var(--product)"></span> 생산성·파생</span>
+    <span class="lg"><span class="nsw" style="background:var(--finance)"></span> 재무</span>
+    <span class="lg"><span class="nsw" style="background:var(--ink-faint)"></span> 뷰</span>
+    <span style="flex-basis:100%;height:0;border-top:1px dashed var(--hair);margin:3px 0"></span>
+    <span class="lg" style="font-weight:700;color:var(--ink-faint)">선 =</span>
+    <span class="lg"><span class="ln fk"></span> 외래키 (1:N)</span>
+    <span class="lg"><span class="ln self"></span> 자기참조(서브)</span>
+    <span class="lg"><span class="jbadge">N:M</span> 조인 테이블 — 다대다 연결용 중간 테이블</span>
+    <span class="lg"><span class="fbadge">ƒ N</span> 수식 N개 → 뷰·생성컬럼으로(저장 안 함)</span>
+    <span class="lg"><span class="vbadge">VIEW</span> 뷰(수식·집계 결과) · 점선=집계</span>
+    <span class="lg"><span style="display:inline-block;width:14px;height:9px;border-radius:2px;background:var(--hi)"></span> 선택/강조</span>
+  </div>
+  <div class="hintbar">↔ 넓으면 스크롤 · 드래그로 정리 · <b style="color:var(--hi)">테이블 클릭=역할 · 속성 클릭=설명</b> · 선 클릭=관계 고정</div>
+</div>
+
+<div class="stage-wrap">
+  <div id="stage">
+    <svg id="wires"></svg>
+  </div>
+</div>
+
+<div id="colinfo" class="colinfo" hidden>
+  <button class="ci-x" aria-label="닫기">✕</button>
+  <div class="ci-head" id="ci-head"></div>
+  <div class="ci-type" id="ci-type"></div>
+  <div class="ci-desc" id="ci-desc"></div>
+</div>
+
+<script>
+const NODES=__NODES__;
+const stage=document.getElementById('stage'), svg=document.getElementById('wires');
+const gcls={c:'c',m:'m',f:'f',p:'p',j:'j',v:'v'};
+
+// 노드 DOM 생성 — 주요 속성만 기본 표시, 나머지는 접기
+const els={}, expanded={};
+const PRIMARY=5;
+function isPrimary(c,i){ return i<PRIMARY || c[2]==='pk' || c[2]==='fk'; }
+function colRow(c,i){
+  const isfk=c[2]==='fk', ispk=c[2]==='pk';
+  return `<div class="col ${ispk?'pk':''} ${isfk?'fkcol':''}" data-row="${i}">${isfk?'🔗 ':''}${c[0]}<span class="ty">${c[1]}</span></div>`;
+}
+function nodeHTML(id){
+  const n=NODES[id];
+  const tag=n.g==='j'?'<span class="fb">N:M</span>':n.g==='v'?'<span class="fb">VIEW</span>':(n.views?`<span class="fb">ƒ ${n.views}</span>`:'');
+  let html=`<div class="nh" data-drag="${id}">${id}${tag}</div>`;
+  const restN=n.cols.filter((c,i)=>!isPrimary(c,i)).length;
+  n.cols.forEach((c,i)=>{ if(isPrimary(c,i)||expanded[id]) html+=colRow(c,i); });
+  if(restN) html+=`<div class="col toggle" data-toggle="${id}">${expanded[id]?'▴ 접기':'▾ '+restN+'개 더'}</div>`;
+  return html;
+}
+for(const id of Object.keys(NODES)){
+  const d=document.createElement('div'); d.className='node '+gcls[NODES[id].g]; d.dataset.id=id;
+  d.innerHTML=nodeHTML(id); d.style.left=NODES[id].x+'px';
+  stage.appendChild(d); els[id]=d;
+}
+function autoLayout(){
+  const cols={};
+  for(const id of Object.keys(NODES)){ (cols[NODES[id].x]=cols[NODES[id].x]||[]).push(id); }
+  let maxBottom=0;
+  Object.keys(cols).map(Number).sort((a,b)=>a-b).forEach(x=>{
+    let y=30;
+    cols[x].forEach(id=>{ NODES[id].y=y; els[id].style.top=y+'px'; els[id].style.left=NODES[id].x+'px'; y+=els[id].offsetHeight+26; });
+    maxBottom=Math.max(maxBottom,y);
+  });
+  stage.style.height=(maxBottom+40)+'px';
+  stage.style.width=(Math.max(...Object.values(NODES).map(n=>n.x))+240)+'px';
+}
+autoLayout();
+
+// 관계 목록: 모든 fk (조인 노드 포함). id를 가리키면 self.
+const RELS=[];
+for(const [id,n] of Object.entries(NODES)){
+  n.cols.forEach((c,i)=>{ if(c[2]==='fk'){ RELS.push({from:id,fromRow:i,to:c[3],type:id===c[3]?'self':'fk',label:c[0]}); }});
+}
+// 집계선: 실테이블 → 뷰 (수식/rollup 대체)
+const AGG=__AGG__;
+AGG.forEach(([f,t])=>{ const pk=NODES[f].cols.findIndex(x=>x[2]==='pk'); RELS.push({from:f,fromRow:pk<0?0:pk,to:t,type:'agg',label:'집계'}); });
+
+// 실제 DOM 위치를 측정해 정확한 앵커를 잡는다(어림 계산 X)
+function rowY(id,row){ const el=els[id].querySelector('[data-row="'+row+'"]'); if(!el){ const h=els[id].querySelector('.nh'); return NODES[id].y + h.offsetTop + h.offsetHeight/2; } return NODES[id].y + el.offsetTop + el.offsetHeight/2; }
+function nodeW(id){ return els[id].offsetWidth; }
+function pkRow(id){ const c=NODES[id].cols; const i=c.findIndex(x=>x[2]==='pk'); return i<0?0:i; }
+
+function drawWire(r){
+  const a=NODES[r.from], b=NODES[r.to], aw=nodeW(r.from), bw=nodeW(r.to);
+  if(r.type==='self'){
+    const sx=a.x+aw, sy=rowY(r.from,r.fromRow), ty=rowY(r.from,pkRow(r.from)), lx=sx+38;
+    return {path:`M ${sx} ${sy} C ${lx} ${sy}, ${lx} ${ty}, ${sx} ${ty}`, sx,sy,tx:sx,ty, mx:lx+4, my:(sy+ty)/2, target:'id'};
+  }
+  // fk: from의 fk속성행(정확 위치) → to의 id(pk)속성행
+  const fromRight = a.x < b.x;
+  const sx = fromRight ? a.x+aw : a.x, sy = rowY(r.from,r.fromRow);
+  const tx = fromRight ? b.x : b.x+bw, ty = rowY(r.to, pkRow(r.to));
+  const dx=Math.max(44,Math.abs(tx-sx)/2)*(fromRight?1:-1);
+  return {path:`M ${sx} ${sy} C ${sx+dx} ${sy}, ${tx-dx} ${ty}, ${tx} ${ty}`, sx,sy,tx,ty, mx:(sx+tx)/2, my:(sy+ty)/2, target:'id'};
+}
+
+const NS='http://www.w3.org/2000/svg';
+function mk(tag,attrs){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);return e;}
+const wireColor={fk:'var(--fk)',nm:'var(--nm)',self:'var(--self)',agg:'var(--ink-faint)'};
+
+let wireEls=[], locked=null;
+function redraw(){
+  svg.innerHTML='';
+  wireEls=RELS.map(r=>{
+    const w=drawWire(r);
+    const g=mk('g',{});
+    const p=mk('path',{d:w.path,class:'wire '+r.type});
+    p.dataset.from=r.from; p.dataset.to=r.to; g.appendChild(p);
+    // 넓은 투명 클릭 영역
+    g.appendChild(mk('path',{d:w.path,class:'hit'}));
+    // 양 끝 연결점
+    g.appendChild(mk('circle',{cx:w.sx,cy:w.sy,r:3.4,fill:wireColor[r.type],class:'anchor'}));
+    g.appendChild(mk('circle',{cx:w.tx,cy:w.ty,r:3.4,fill:wireColor[r.type],class:'anchor'}));
+    svg.appendChild(g);
+    // 라벨: "속성 → id" (집계선은 라벨 생략)
+    if(r.type!=='agg'){
+      const bg=mk('rect',{class:'wlbg',rx:4,fill:'var(--panel)'});
+      const t=mk('text',{x:w.mx,y:w.my-4,class:'wlabel','text-anchor':'middle'}); t.textContent=`${r.label} → ${w.target}`;
+      g.appendChild(bg); g.appendChild(t);
+      const bb=t.getBBox(); bg.setAttribute('x',bb.x-4); bg.setAttribute('y',bb.y-1.5); bg.setAttribute('width',bb.width+8); bg.setAttribute('height',bb.height+3);
+    }
+    const wobj={el:p,g,r};
+    g.addEventListener('mouseenter',()=>{ if(!locked) focusRel(wobj); });
+    g.addEventListener('mouseleave',()=>{ if(!locked) clearFocus(); });
+    g.addEventListener('click',e=>{ e.stopPropagation(); if(locked===wobj){locked=null;clearFocus();} else {locked=wobj;focusRel(wobj,true);} });
+    return wobj;
+  });
+}
+function rowHl(id,idx){ const el=els[id]&&els[id].querySelector('[data-row="'+idx+'"]'); if(el) el.classList.add('rowhl'); }
+function clearRowHl(){ document.querySelectorAll('.col.rowhl').forEach(e=>e.classList.remove('rowhl')); }
+function focusRel(w,sel){
+  wireEls.forEach(x=>{ x.g.classList.toggle(sel?'sel':'hl', x===w); x.g.classList.toggle('dim', x!==w); if(x!==w)x.g.classList.remove('sel','hl'); });
+  Object.entries(els).forEach(([id,d])=> d.classList.toggle('dim', !(id===w.r.from||id===w.r.to)) );
+  clearRowHl(); if(w.r.fromRow!=null) rowHl(w.r.from,w.r.fromRow); rowHl(w.r.to, pkRow(w.r.to));
+}
+function clearFocus(){ wireEls.forEach(x=>x.g.classList.remove('hl','dim','sel')); Object.values(els).forEach(d=>d.classList.remove('dim')); clearRowHl(); }
+redraw();
+stage.addEventListener('click',e=>{
+  const tog=e.target.closest('[data-toggle]');
+  if(tog){ e.stopPropagation(); const id=tog.dataset.toggle; expanded[id]=!expanded[id]; els[id].innerHTML=nodeHTML(id); autoLayout(); redraw(); return; }
+  const col=e.target.closest('.col');
+  if(col && col.dataset.row!==undefined){ e.stopPropagation(); showColInfo(col.closest('.node').dataset.id, +col.dataset.row); return; }
+  if(e.target.closest('.node')||e.target.closest('.hit')||e.target.closest('.wlabel')) return;
+  locked=null; clearFocus();
+});
+
+// hover 강조
+Object.entries(els).forEach(([id,d])=>{
+  d.addEventListener('mouseenter',()=>{
+    if(locked) return;
+    wireEls.forEach(w=>{
+      const on = w.r.from===id||w.r.to===id;
+      w.g.classList.toggle('hl',on); w.g.classList.toggle('dim',!on);
+    });
+    Object.entries(els).forEach(([oid,od])=>{
+      const linked = oid===id || RELS.some(r=>(r.from===id&&r.to===oid)||(r.to===id&&r.from===oid));
+      od.classList.toggle('dim',!linked);
+    });
+    // 이 테이블이 관여하는 FK 속성 행 강조
+    clearRowHl();
+    RELS.forEach(r=>{ if(r.from===id&&r.fromRow!=null) rowHl(id,r.fromRow); if(r.to===id) rowHl(id,pkRow(id)); });
+  });
+  d.addEventListener('mouseleave',()=>{
+    if(locked) return;
+    wireEls.forEach(w=>{w.g.classList.remove('hl','dim');});
+    Object.values(els).forEach(od=>od.classList.remove('dim'));
+    clearRowHl();
+  });
+});
+
+// 드래그
+let drag=null;
+stage.addEventListener('pointerdown',e=>{
+  const h=e.target.closest('[data-drag]'); if(!h)return;
+  const id=h.dataset.drag; drag={id,ox:e.clientX,oy:e.clientY,sx:NODES[id].x,sy:NODES[id].y,moved:false};
+  h.setPointerCapture(e.pointerId);
+});
+stage.addEventListener('pointermove',e=>{
+  if(!drag)return;
+  if(!drag.moved && Math.abs(e.clientX-drag.ox)+Math.abs(e.clientY-drag.oy)>4){ drag.moved=true; locked=null; clearFocus(); }
+  if(!drag.moved) return;
+  NODES[drag.id].x=Math.max(0,drag.sx+(e.clientX-drag.ox));
+  NODES[drag.id].y=Math.max(0,drag.sy+(e.clientY-drag.oy));
+  els[drag.id].style.left=NODES[drag.id].x+'px'; els[drag.id].style.top=NODES[drag.id].y+'px';
+  redraw();
+});
+stage.addEventListener('pointerup',()=>{ if(drag && !drag.moved) showTableInfo(drag.id); drag=null; });
+
+// ── 테이블 역할 설명 ──
+const TABLE_DESC=__TABLE_DESC__;
+
+// ── 속성 설명 (전 컬럼) ──
+const DESC=__DESC__;
+const TYPE_DESC={select:'선택형 값(정해진 목록 중 하나).',numeric:'숫자.',ts:'날짜와 시각.',date:'날짜.',text:'자유 텍스트.','text[]':'여러 값을 담는 배열.',bool:'예/아니오 체크값.',bigint:'큰 정수(고유 번호).',uuid:'고유 id.'};
+function colDesc(id,c){
+  const k=id+'.'+c[0]; if(DESC[k]) return DESC[k];
+  if(c[2]==='pk') return '기본키 — 이 행을 구분하는 고유 id(uuid 자동 생성). 다른 테이블이 이 값으로 이 행을 가리킨다.';
+  if(c[2]==='fk'){ const tgt=TABLE_DESC[c[3]]||''; return '외래키 — '+c[3]+' 테이블의 한 행을 가리켜 연결한다.'+(tgt?'\n\n['+c[3]+'] '+tgt.split('.')[0]+'.':''); }
+  return TYPE_DESC[c[1]]||('타입: '+c[1]);
+}
+function showColInfo(id,row){
+  const c=NODES[id].cols[row];
+  const role=c[2]==='pk'?'PK':c[2]==='fk'?'FK → '+c[3]:'';
+  document.getElementById('ci-head').innerHTML=id+' . <b>'+c[0]+'</b>';
+  document.getElementById('ci-type').textContent='속성 · '+(role?role+' · ':'')+c[1];
+  document.getElementById('ci-desc').textContent=colDesc(id,c);
+  document.getElementById('colinfo').hidden=false;
+}
+function showTableInfo(id){
+  const n=NODES[id];
+  const gname={c:'수집 계층',m:'마스터·허브',p:'생산성·파생',f:'재무',j:'조인 테이블(N:M)',v:'뷰'}[n.g];
+  document.getElementById('ci-head').innerHTML='<b>'+id+'</b>';
+  document.getElementById('ci-type').textContent='테이블 · '+gname+' · '+n.cols.length+' 컬럼';
+  document.getElementById('ci-desc').textContent=TABLE_DESC[id]||'';
+  document.getElementById('colinfo').hidden=false;
+}
+document.querySelector('.ci-x').addEventListener('click',()=>document.getElementById('colinfo').hidden=true);
+</script>

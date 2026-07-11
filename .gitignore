@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+/notion_raw.json
+/erd.html
+/*.local.*
+.DS_Store
